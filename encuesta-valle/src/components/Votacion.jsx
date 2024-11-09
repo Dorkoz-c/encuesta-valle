@@ -10,13 +10,15 @@ const Votacion = () => {
   const [candidatoSeleccionado, setCandidatoSeleccionado] = useState('');
   const [error, setError] = useState('');
   const [ganador, setGanador] = useState(null);
-
+  const [votosCargados, setVotosCargados] = useState(false); // Nuevo estado para controlar la carga inicial
+  
   const palabrasProhibidas = ["Manzana", "coliflor", "bombilla", "derecha", "izquierda", "rojo", "azul"];
 
   const obtenerVotos = async () => {
     try {
       const response = await axios.get('https://null-valle.onrender.com/api/votos');
       setVotos(response.data);
+      setVotosCargados(true);
     } catch (error) {
       console.error("Error al obtener los votos:", error);
     }
@@ -79,6 +81,7 @@ const Votacion = () => {
   };
 
   const verificarGanador = () => {
+    if (ganador || !votosCargados) return; // Evitar recalcular si ya hay ganador o los votos no están cargados
     const puntuacionDavid = votos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
     const puntuacionJonathan = votos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
 
@@ -92,6 +95,7 @@ const Votacion = () => {
   const resetearEncuesta = () => {
     setGanador(null);
     setVotos([]);
+    setVotosCargados(false); // Resetear el estado de carga
   };
 
   useEffect(() => {
