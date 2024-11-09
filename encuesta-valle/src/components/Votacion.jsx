@@ -26,10 +26,14 @@ const Votacion = () => {
   const enviarVoto = async (e) => {
     e.preventDefault();
     setError('');
-    if (palabrasProhibidas.some(palabra => nickname.toLowerCase().includes(palabra.toLowerCase()))) {
-      setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
-      return;
-    }
+    // Eliminar todos los espacios dentro del nickname
+ const nicknameSinEspacios = nickname.replace(/\s+/g, '');
+
+ // Validar el nickname sin espacios
+ if (palabrasProhibidas.some(palabra => nicknameSinEspacios.toLowerCase().includes(palabra.toLowerCase()))) {
+   setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
+   return;
+ }
     if (nickname.length < 6 || nickname.length > 8) {
       setError('El nickname debe tener entre 6 y 8 caracteres.');
       return;
@@ -42,8 +46,12 @@ const Votacion = () => {
       setError('Debe seleccionar a un candidato.');
       return;
     }
+        if (valoracion === 0) {
+      setError('Debe seleccionar una valoración.');
+      return;
+    }
 
-    // Ofuscar todas las palabras prohibidas en el comentario
+     // Ofuscar todas las palabras prohibidas en el comentario
     let comentarioOfuscado = comentario;
     palabrasProhibidas.forEach(palabra => {
       const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
@@ -52,13 +60,13 @@ const Votacion = () => {
 
     try {
       await axios.post('https://null-valle.onrender.com/api/votos', {
-        nickname,
+        nickname: nicknameSinEspacios,
         comentario: comentarioOfuscado,
         valoracion,
         candidato: candidatoSeleccionado
       });
 
-      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion, candidato: candidatoSeleccionado };
+      const nuevoVoto = { nickname: nicknameSinEspacios, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
       setVotos([...votos, nuevoVoto]);
       setNickname('');
       setComentario('');
@@ -70,6 +78,7 @@ const Votacion = () => {
       setError('Error al registrar el voto');
     }
   };
+
 
   // Verificar el ganador
   const verificarGanador = (nuevosVotos) => {
