@@ -10,17 +10,22 @@ const Votacion = () => {
   const [candidatoSeleccionado, setCandidatoSeleccionado] = useState('');
   const [error, setError] = useState('');
   const [ganador, setGanador] = useState(null);
-  const [votosCargados, setVotosCargados] = useState(false); // Nuevo estado para controlar la carga inicial
-  
+
   const palabrasProhibidas = ["Manzana", "coliflor", "bombilla", "derecha", "izquierda", "rojo", "azul"];
 
+  // Obtener votos desde el servidor
   const obtenerVotos = async () => {
     try {
       const response = await axios.get('https://null-valle.onrender.com/api/votos');
-      setVotos(response.data);
-      setVotosCargados(true);
+      console.log('Respuesta de la API:', response.data); // Verificar qué se recibe
+      if (Array.isArray(response.data)) {
+        setVotos(response.data);
+      } else {
+        setError('La respuesta no es un arreglo');
+      }
     } catch (error) {
       console.error("Error al obtener los votos:", error);
+      setError('Error al obtener los votos');
     }
   };
 
@@ -45,47 +50,38 @@ const Votacion = () => {
       return;
     }
 
-    // Ofuscar todas las palabras prohibidas en el comentario
-    let comentarioOfuscado = comentario;
-    palabrasProhibidas.forEach(palabra => {
-      const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
-      comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
-    });
-
+// Ofuscar todas las palabras prohibidas en el comentario
+let comentarioOfuscado = comentario;
+palabrasProhibidas.forEach(palabra => {
+  const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
+  comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
+});
     try {
-      // Enviar el voto al servidor
       await axios.post('https://null-valle.onrender.com/api/votos', {
         nickname,
         comentario: comentarioOfuscado,
         valoracion,
         candidato: candidatoSeleccionado
       });
-
-      // Si la solicitud es exitosa, actualizamos los votos en el estado
+      
       const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
-      setVotos(prevVotos => {
-        const nuevosVotos = [...prevVotos, nuevoVoto];
-        return nuevosVotos;
-      });
-
-      // Limpiar el formulario
+      setVotos([...votos, nuevoVoto]);
       setNickname('');
       setComentario('');
       setValoracion(0);
       setCandidatoSeleccionado('');
-
+      verificarGanador([...votos, nuevoVoto]);
     } catch (error) {
       console.error("Error al registrar el voto:", error);
       setError('Error al registrar el voto');
     }
   };
 
-  const verificarGanador = () => {
-    if (ganador || !votosCargados) return; // Evitar recalcular si ya hay ganador o los votos no están cargados
-    const puntuacionDavid = votos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
-    const puntuacionJonathan = votos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
-
-    if (votos.length >= 10) {
+  const verificarGanador = (nuevosVotos) => {
+    if (nuevosVotos.length >= 10) {
+      const puntuacionDavid = nuevosVotos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
+      const puntuacionJonathan = nuevosVotos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
+      
       if (puntuacionDavid > puntuacionJonathan) setGanador('David Larousse');
       else if (puntuacionJonathan > puntuacionDavid) setGanador('Jonathan Lowrie');
       else setGanador('Empate');
@@ -95,18 +91,11 @@ const Votacion = () => {
   const resetearEncuesta = () => {
     setGanador(null);
     setVotos([]);
-    setVotosCargados(false); // Resetear el estado de carga
   };
 
   useEffect(() => {
     obtenerVotos();
   }, []);
-
-  useEffect(() => {
-    if (votos.length >= 10) {
-      verificarGanador();
-    }
-  }, [votos]);
 
   return (
     <div className="votacion-container">
