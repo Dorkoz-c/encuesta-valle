@@ -25,6 +25,8 @@ const Votacion = () => {
   const enviarVoto = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Validaciones
     if (palabrasProhibidas.some(palabra => nickname.toLowerCase().includes(palabra.toLowerCase()))) {
       setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
       return;
@@ -60,11 +62,8 @@ const Votacion = () => {
       });
 
       // Si la solicitud es exitosa, actualizamos los votos en el estado
-      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
-      setVotos(prevVotos => {
-        const nuevosVotos = [...prevVotos, nuevoVoto];
-        return nuevosVotos;
-      });
+      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion, candidato: candidatoSeleccionado };
+      setVotos(prevVotos => [...prevVotos, nuevoVoto]);
 
       // Limpiar el formulario
       setNickname('');
