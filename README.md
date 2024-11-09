@@ -9,13 +9,7 @@ Este proyecto es una aplicación de votación creada con **React** para el front
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
 - [Configuración de la Base de Datos (MongoDB Atlas)](#configuración-de-la-base-de-datos-mongodb-atlas)
-- [Estructura del Proyecto](#estructura-del-proyecto)
 - [Uso](#uso)
-- [Detalles Técnicos](#detalles-técnicos)
-- [Vista Previa](#vista-previa)
-- [Contribuciones](#contribuciones)
-- [Licencia](#licencia)
-
 ---
 
 ## Características
@@ -41,3 +35,40 @@ Primero, clona el repositorio a tu máquina local:
 ```bash
 git clone https://github.com/Dorkoz-c/encuesta-valle/tree/main
 cd tu-repositorio
+```
+#Paso 2: Instalar Dependencias
+#Backend:
+Dirígete a la carpeta del backend e instala las dependencias de Node.js:
+```bash
+cd backend
+npm install
+```
+#Frontend:
+Luego, dirígete a la carpeta del frontend e instala las dependencias de React:
+```bash
+cd ../frontend
+npm install
+```
+## Configuración de la Base de Datos (MongoDB Atlas)
+Crea una cuenta en MongoDB Atlas si aún no tienes una.
+Crea un nuevo cluster y una base de datos.
+Crea un usuario de base de datos con los permisos adecuados para la base de datos.
+Copia la URI de conexión de MongoDB Atlas.
+En el backend, crea un archivo .env en la raíz del proyecto y agrega la URI de conexión:
+
+```bash
+MONGODB_URI=tu-uri-de-conexión
+```
+## Uso
+En primer lugar, asegúrate de haber configurado correctamente la base de datos de MongoDB y de haber instalado las dependencias.
+
+En la carpeta backend, ejecuta el servidor:
+```bash
+npm start
+```
+Esto levantará el servidor en http://localhost:5000.
+
+En la carpeta frontend, ejecuta la aplicación de React:
+```bash
+npm run dev
+```
