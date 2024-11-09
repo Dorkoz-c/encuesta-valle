@@ -32,6 +32,7 @@ const Votacion = () => {
       setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
       return;
     }
+
     if (nickname.length < 6 || nickname.length > 8) {
       setError('El nickname debe tener entre 6 y 8 caracteres.');
       return;
@@ -66,6 +67,7 @@ const Votacion = () => {
       setComentario('');
       setValoracion(0);
       setCandidatoSeleccionado('');
+
     } catch (error) {
       console.error("Error al registrar el voto:", error);
       setError('Error al registrar el voto');
@@ -85,13 +87,14 @@ const Votacion = () => {
 
   const resetearEncuesta = async () => {
     try {
-      await axios.delete('https://null-valle.onrender.com/api/votos'); // Limpiar votos en el backend
-      setGanador(null);
+      await axios.delete('https://null-valle.onrender.com/api/votos');
       setVotos([]);
+      setGanador(null);
       setVotosCargados(false);
+      obtenerVotos(); // Recargar votos para obtener un estado limpio desde el backend
     } catch (error) {
       console.error("Error al resetear la encuesta:", error);
-      setError('Error al resetear la encuesta');
+      setError('No se pudo resetear la encuesta.');
     }
   };
 
@@ -100,10 +103,10 @@ const Votacion = () => {
   }, []);
 
   useEffect(() => {
-    if (votosCargados && votos.length >= 10 && !ganador) {
+    if (votosCargados && votos.length >= 10) {
       verificarGanador();
     }
-  }, [votos, votosCargados, ganador]);
+  }, [votos, votosCargados]);
 
   return (
     <div className="votacion-container">
