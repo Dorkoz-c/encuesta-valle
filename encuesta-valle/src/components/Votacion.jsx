@@ -10,7 +10,7 @@ const Votacion = () => {
   const [candidatoSeleccionado, setCandidatoSeleccionado] = useState('');
   const [error, setError] = useState('');
   const [ganador, setGanador] = useState(null);
-  const [votosCargados, setVotosCargados] = useState(false); // Indicador de carga de votos
+  const [votosCargados, setVotosCargados] = useState(false);
 
   const palabrasProhibidas = ["Manzana", "coliflor", "bombilla", "derecha", "izquierda", "rojo", "azul"];
 
@@ -18,7 +18,7 @@ const Votacion = () => {
     try {
       const response = await axios.get('https://null-valle.onrender.com/api/votos');
       setVotos(response.data);
-      setVotosCargados(true); // Marcar los votos como cargados
+      setVotosCargados(true);
     } catch (error) {
       console.error("Error al obtener los votos:", error);
     }
@@ -28,12 +28,10 @@ const Votacion = () => {
     e.preventDefault();
     setError('');
     
-    // Validaciones
     if (palabrasProhibidas.some(palabra => nickname.toLowerCase().includes(palabra.toLowerCase()))) {
       setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
       return;
     }
-
     if (nickname.length < 6 || nickname.length > 8) {
       setError('El nickname debe tener entre 6 y 8 caracteres.');
       return;
@@ -47,15 +45,13 @@ const Votacion = () => {
       return;
     }
 
-    // Ofuscar todas las palabras prohibidas en el comentario
     let comentarioOfuscado = comentario;
     palabrasProhibidas.forEach(palabra => {
-      const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
+      const regex = new RegExp(`\\b${palabra}\\b`, 'gi');
       comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
     });
 
     try {
-      // Enviar el voto al servidor
       await axios.post('https://null-valle.onrender.com/api/votos', {
         nickname,
         comentario: comentarioOfuscado,
@@ -63,16 +59,13 @@ const Votacion = () => {
         candidato: candidatoSeleccionado
       });
 
-      // Si la solicitud es exitosa, actualizamos los votos en el estado
       const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion, candidato: candidatoSeleccionado };
       setVotos(prevVotos => [...prevVotos, nuevoVoto]);
 
-      // Limpiar el formulario
       setNickname('');
       setComentario('');
       setValoracion(0);
       setCandidatoSeleccionado('');
-
     } catch (error) {
       console.error("Error al registrar el voto:", error);
       setError('Error al registrar el voto');
@@ -90,10 +83,16 @@ const Votacion = () => {
     }
   };
 
-  const resetearEncuesta = () => {
-    setGanador(null);
-    setVotos([]);
-    setVotosCargados(false); // Resetear el indicador de carga de votos
+  const resetearEncuesta = async () => {
+    try {
+      await axios.delete('https://null-valle.onrender.com/api/votos'); // Limpiar votos en el backend
+      setGanador(null);
+      setVotos([]);
+      setVotosCargados(false);
+    } catch (error) {
+      console.error("Error al resetear la encuesta:", error);
+      setError('Error al resetear la encuesta');
+    }
   };
 
   useEffect(() => {
@@ -101,11 +100,10 @@ const Votacion = () => {
   }, []);
 
   useEffect(() => {
-    // Solo verificar ganador cuando los votos estén cargados y sean suficientes
-    if (votosCargados && votos.length >= 10) {
+    if (votosCargados && votos.length >= 10 && !ganador) {
       verificarGanador();
     }
-  }, [votosCargados]); // Cambiado para que solo se verifique una vez después de la carga inicial
+  }, [votos, votosCargados, ganador]);
 
   return (
     <div className="votacion-container">
