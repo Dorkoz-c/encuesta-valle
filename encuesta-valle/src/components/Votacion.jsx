@@ -43,27 +43,35 @@ const Votacion = () => {
       return;
     }
 
-// Ofuscar todas las palabras prohibidas en el comentario
-let comentarioOfuscado = comentario;
-palabrasProhibidas.forEach(palabra => {
-  const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
-  comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
-});
+    // Ofuscar todas las palabras prohibidas en el comentario
+    let comentarioOfuscado = comentario;
+    palabrasProhibidas.forEach(palabra => {
+      const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
+      comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
+    });
+
     try {
+      // Enviar el voto al servidor
       await axios.post('https://null-valle.onrender.com/api/votos', {
         nickname,
         comentario: comentarioOfuscado,
         valoracion,
         candidato: candidatoSeleccionado
       });
-      
+
+      // Si la solicitud es exitosa, actualizamos los votos en el estado
       const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
-      setVotos([...votos, nuevoVoto]);
+      setVotos(prevVotos => {
+        const nuevosVotos = [...prevVotos, nuevoVoto];
+        verificarGanador(nuevosVotos);  // Verificar el ganador después de agregar el nuevo voto
+        return nuevosVotos;
+      });
+
+      // Limpiar el formulario
       setNickname('');
       setComentario('');
       setValoracion(0);
       setCandidatoSeleccionado('');
-      verificarGanador([...votos, nuevoVoto]);
     } catch (error) {
       console.error("Error al registrar el voto:", error);
       setError('Error al registrar el voto');
@@ -74,7 +82,7 @@ palabrasProhibidas.forEach(palabra => {
     if (nuevosVotos.length >= 10) {
       const puntuacionDavid = nuevosVotos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
       const puntuacionJonathan = nuevosVotos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
-      
+
       if (puntuacionDavid > puntuacionJonathan) setGanador('David Larousse');
       else if (puntuacionJonathan > puntuacionDavid) setGanador('Jonathan Lowrie');
       else setGanador('Empate');
