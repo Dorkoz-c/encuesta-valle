@@ -10,6 +10,7 @@ router.post('/', async (req, res) => {
     try {
         const { nickname, comentario, valoracion, candidato } = req.body;
         console.log("Datos recibidos:", { nickname, comentario, valoracion, candidato });
+
         // Verificar si el nickname contiene alguna palabra prohibida
         const contienePalabraProhibida = palabrasProhibidas.some(palabra => nickname.toLowerCase().includes(palabra));
         if (contienePalabraProhibida) {
@@ -35,6 +36,17 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener los votos:', error);
         res.status(500).json({ message: 'Error al obtener los votos' });
+    }
+});
+
+// Ruta para eliminar todos los votos (resetear encuesta)
+router.delete('/', async (req, res) => {
+    try {
+        await Voto.deleteMany(); // Elimina todos los documentos de la colección
+        res.status(200).json({ message: 'Encuesta reiniciada correctamente' });
+    } catch (error) {
+        console.error('Error al reiniciar la encuesta:', error);
+        res.status(500).json({ message: 'Error al reiniciar la encuesta' });
     }
 });
 
