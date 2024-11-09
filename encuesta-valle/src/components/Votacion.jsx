@@ -105,7 +105,7 @@ const Votacion = () => {
     if (votosCargados && votos.length >= 10) {
       verificarGanador();
     }
-  }, [votos, votosCargados]);
+  }, [votosCargados]); // Cambiado para que solo se verifique una vez después de la carga inicial
 
   return (
     <div className="votacion-container">
