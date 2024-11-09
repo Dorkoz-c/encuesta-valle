@@ -63,7 +63,6 @@ const Votacion = () => {
       const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
       setVotos(prevVotos => {
         const nuevosVotos = [...prevVotos, nuevoVoto];
-        verificarGanador(nuevosVotos);  // Verificar el ganador después de agregar el nuevo voto
         return nuevosVotos;
       });
 
@@ -72,17 +71,18 @@ const Votacion = () => {
       setComentario('');
       setValoracion(0);
       setCandidatoSeleccionado('');
+
     } catch (error) {
       console.error("Error al registrar el voto:", error);
       setError('Error al registrar el voto');
     }
   };
 
-  const verificarGanador = (nuevosVotos) => {
-    if (nuevosVotos.length >= 10) {
-      const puntuacionDavid = nuevosVotos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
-      const puntuacionJonathan = nuevosVotos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
+  const verificarGanador = () => {
+    const puntuacionDavid = votos.filter(v => v.candidato === 'David').reduce((acc, v) => acc + v.valoracion, 0);
+    const puntuacionJonathan = votos.filter(v => v.candidato === 'Jonathan').reduce((acc, v) => acc + v.valoracion, 0);
 
+    if (votos.length >= 10) {
       if (puntuacionDavid > puntuacionJonathan) setGanador('David Larousse');
       else if (puntuacionJonathan > puntuacionDavid) setGanador('Jonathan Lowrie');
       else setGanador('Empate');
@@ -97,6 +97,12 @@ const Votacion = () => {
   useEffect(() => {
     obtenerVotos();
   }, []);
+
+  useEffect(() => {
+    if (votos.length >= 10) {
+      verificarGanador();
+    }
+  }, [votos]);
 
   return (
     <div className="votacion-container">
