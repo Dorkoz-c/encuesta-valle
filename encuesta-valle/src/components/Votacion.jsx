@@ -58,7 +58,7 @@ const Votacion = () => {
         candidato: candidatoSeleccionado
       });
 
-      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
+      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion, candidato: candidatoSeleccionado };
       setVotos([...votos, nuevoVoto]);
       setNickname('');
       setComentario('');
