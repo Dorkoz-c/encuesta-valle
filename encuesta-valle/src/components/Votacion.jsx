@@ -15,7 +15,7 @@ const Votacion = () => {
 
   const obtenerVotos = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/votos');
+      const response = await axios.get('https://null-valle.onrender.com');
       setVotos(response.data);
     } catch (error) {
       console.error("Error al obtener los votos:", error);
@@ -50,7 +50,7 @@ palabrasProhibidas.forEach(palabra => {
   comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
 });
     try {
-      await axios.post('http://localhost:5000/api/votos', {
+      await axios.post('https://null-valle.onrender.com', {
         nickname,
         comentario: comentarioOfuscado,
         valoracion,
