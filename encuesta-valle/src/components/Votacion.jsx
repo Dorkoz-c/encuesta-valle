@@ -15,7 +15,7 @@ const Votacion = () => {
 
   const obtenerVotos = async () => {
     try {
-      const response = await axios.get('https://null-valle.onrender.com');
+      const response = await axios.get('https://null-valle.onrender.com/api/votos');
       setVotos(response.data);
     } catch (error) {
       console.error("Error al obtener los votos:", error);
@@ -50,7 +50,7 @@ palabrasProhibidas.forEach(palabra => {
   comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
 });
     try {
-      await axios.post('https://null-valle.onrender.com', {
+      await axios.post('https://null-valle.onrender.com/api/votos', {
         nickname,
         comentario: comentarioOfuscado,
         valoracion,
@@ -97,14 +97,14 @@ palabrasProhibidas.forEach(palabra => {
       {ganador ? (
         <div className="ganador">
           <h2>¡Ganador: {ganador}!</h2>
-          <img src={ganador === 'David Larousse' ? '../public/David Larousse.png' : '../public/jonathan Lowrie.png'} alt="Ganador" />
+          <img src={ganador === 'David Larousse' ? 'David Larousse.png' : 'Jonathan Lowrie.png'} alt="Ganador" />
           <button onClick={resetearEncuesta}>Resetear Encuesta</button>
         </div>
       ) : (
         <>
           <div className="candidatos">
             <div className="candidato">
-              <img src="../public/David Larousse.png" alt="David Larousse" />
+              <img src="David Larousse.png" alt="David Larousse" />
               <h3>David Larousse</h3>
               <ul>
                 {votos.filter(v => v.candidato === 'David').map((v, index) => (
@@ -113,7 +113,7 @@ palabrasProhibidas.forEach(palabra => {
               </ul>
             </div>
             <div className="candidato">
-              <img src="../public/jonathan Lowrie.png" alt="Jonathan Lowrie" />
+              <img src="Jonathan Lowrie.png" alt="Jonathan Lowrie" />
               <h3>Jonathan Lowrie</h3>
               <ul>
                 {votos.filter(v => v.candidato === 'Jonathan').map((v, index) => (
