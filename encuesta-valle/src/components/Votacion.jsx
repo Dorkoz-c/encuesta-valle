@@ -10,7 +10,6 @@ const Votacion = () => {
   const [candidatoSeleccionado, setCandidatoSeleccionado] = useState('');
   const [error, setError] = useState('');
   const [ganador, setGanador] = useState(null);
-  const [votosCargados, setVotosCargados] = useState(false);
 
   const palabrasProhibidas = ["Manzana", "coliflor", "bombilla", "derecha", "izquierda", "rojo", "azul"];
 
@@ -18,7 +17,6 @@ const Votacion = () => {
     try {
       const response = await axios.get('https://null-valle.onrender.com/api/votos');
       setVotos(response.data);
-      setVotosCargados(true);
     } catch (error) {
       console.error("Error al obtener los votos:", error);
     }
@@ -27,7 +25,6 @@ const Votacion = () => {
   const enviarVoto = async (e) => {
     e.preventDefault();
     setError('');
-    
     if (palabrasProhibidas.some(palabra => nickname.toLowerCase().includes(palabra.toLowerCase()))) {
       setError('El nickname contiene una palabra prohibida. Por favor elige otro.');
       return;
@@ -46,13 +43,15 @@ const Votacion = () => {
       return;
     }
 
+    // Ofuscar todas las palabras prohibidas en el comentario
     let comentarioOfuscado = comentario;
     palabrasProhibidas.forEach(palabra => {
-      const regex = new RegExp(`\\b${palabra}\\b`, 'gi');
+      const regex = new RegExp(`\\b${palabra}\\b`, 'gi'); // Regex para encontrar la palabra completa sin importar mayúsculas/minúsculas
       comentarioOfuscado = comentarioOfuscado.replace(regex, '*'.repeat(palabra.length));
     });
 
     try {
+      // Enviar el voto al servidor
       await axios.post('https://null-valle.onrender.com/api/votos', {
         nickname,
         comentario: comentarioOfuscado,
@@ -60,9 +59,14 @@ const Votacion = () => {
         candidato: candidatoSeleccionado
       });
 
-      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion, candidato: candidatoSeleccionado };
-      setVotos(prevVotos => [...prevVotos, nuevoVoto]);
+      // Si la solicitud es exitosa, actualizamos los votos en el estado
+      const nuevoVoto = { nickname, comentario: comentarioOfuscado, valoracion: valoracion * (candidatoSeleccionado === 'David' ? 1 : -1), candidato: candidatoSeleccionado };
+      setVotos(prevVotos => {
+        const nuevosVotos = [...prevVotos, nuevoVoto];
+        return nuevosVotos;
+      });
 
+      // Limpiar el formulario
       setNickname('');
       setComentario('');
       setValoracion(0);
@@ -85,17 +89,9 @@ const Votacion = () => {
     }
   };
 
-  const resetearEncuesta = async () => {
-    try {
-      await axios.delete('https://null-valle.onrender.com/api/votos');
-      setVotos([]);
-      setGanador(null);
-      setVotosCargados(false);
-      obtenerVotos(); // Recargar votos para obtener un estado limpio desde el backend
-    } catch (error) {
-      console.error("Error al resetear la encuesta:", error);
-      setError('No se pudo resetear la encuesta.');
-    }
+  const resetearEncuesta = () => {
+    setGanador(null);
+    setVotos([]);
   };
 
   useEffect(() => {
@@ -103,10 +99,10 @@ const Votacion = () => {
   }, []);
 
   useEffect(() => {
-    if (votosCargados && votos.length >= 10) {
+    if (votos.length >= 10) {
       verificarGanador();
     }
-  }, [votos, votosCargados]);
+  }, [votos]);
 
   return (
     <div className="votacion-container">
